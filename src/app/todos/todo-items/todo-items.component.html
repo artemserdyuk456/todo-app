@@ -1,10 +1,12 @@
 <ul>
-  <!--<li *ngFor="let items of todoItems">-->
-    <!--<span>{{items.id}} </span> {{items.title}}-->
-    <!--{{this.route.snapshot.data.value}}-->
-  <!--</li>-->
+  <li *ngFor="let items of todoItems | filterTodoItemsPipe:'complete'">
+    <span>{{items.id}} </span> {{items.title}}
+    <button type="button" (click)="deleteTodoItemById(items.id)">Delete</button>
 
-  <li *ngFor="let items of data | filterTodoItemsPipe:'complete'">
-    <span>{{items.id}} </span> {{items.title}} <span>completed: {{items.complete}}</span>
   </li>
+
+  <!--<li *ngFor="let items of data | filterTodoItemsPipe:'complete'">-->
+    <!--<span>{{items.id}} </span> {{items.title}} <span>completed: {{items.complete}}</span>-->
+    <!--<button type="button" (click)="deleteTodoItemById(items.id)">Delete</button>-->
+  <!--</li>-->
 </ul>

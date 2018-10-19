@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { TodoItems } from '../../core/models/todo-items';
 import { TodoItemsService } from '../../core/services/todo-items.service';
 import {ActivatedRoute, Data} from "@angular/router";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-todo-items',
@@ -11,18 +12,24 @@ import {ActivatedRoute, Data} from "@angular/router";
 })
 export class TodoItemsComponent implements OnInit {
   todoItems: TodoItems[];
+  itemsSub: Subscription;
   data: any;
 
   constructor(private todoItemsService: TodoItemsService,
               private route: ActivatedRoute ) {
-    this.data = route.snapshot.data.title;
   }
 
   ngOnInit() {
     this.todoItems = this.todoItemsService.todoItems;
     this.data = this.route.snapshot.data.value;
-    console.log(this.route.snapshot.data.value);
-    // this.route.snapshot.data
 
+    this.itemsSub = this.todoItemsService.getUpdateTodoItems()
+      .subscribe((items: TodoItems[]) => {
+        this.todoItems = items;
+      });
+  }
+
+  deleteTodoItemById(id: number) {
+    this.todoItemsService.deleteTodoItemById(id);
   }
 }
