@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 import { TODO_ITEMS } from '../mock/mock-todo-items';
 import { TodoItems } from '../models/todo-items';
-import {Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root',
@@ -11,9 +11,35 @@ export class TodoItemsService {
   todoItems: TodoItems[] = TODO_ITEMS;
   updateTodoItems = new Subject<TodoItems[]>();
 
+  toggleTodoItemComplete(id: number) {
+    const updateItems = this.todoItems.map(
+      item => {
+        if (item.id === id) {
+          item.complete = !item.complete;
+        }
+        return item;
+      }
+    );
+
+    this.todoItems = updateItems;
+    this.updateTodoItems.next([...this.todoItems]);
+
+  }
+
+  addTodoItem(newItem) {
+    this.todoItems.push(
+      {
+         id: newItem.id,
+         title: newItem.title,
+         complete: newItem.complete
+      });
+    this.updateTodoItems.next([...this.todoItems]);
+  }
+
+
   deleteTodoItemById(id: number) {
-    const updateTodoItems = this.todoItems.filter(item => item.id !== id);
-    this.todoItems = updateTodoItems;
+    const updateItems = this.todoItems.filter(item => item.id !== id);
+    this.todoItems = updateItems;
     this.updateTodoItems.next([...this.todoItems]);
   }
 

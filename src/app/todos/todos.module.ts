@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
+import {SharedModule} from '../shared/shared.module';
+
 import {FooterModule} from './footer/footer.module';
 import {HeaderModule} from './header/header.module';
 import { TodoItemsModule } from './todo-items/todo-items.module';
@@ -12,7 +14,7 @@ import { TodosComponent } from './todos.component';
     TodosComponent
   ],
   imports: [
-    CommonModule,
+    SharedModule,
     TodosRoutingModule,
     HeaderModule,
     FooterModule,
