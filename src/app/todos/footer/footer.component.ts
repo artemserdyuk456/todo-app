@@ -26,7 +26,7 @@ export class FooterComponent implements OnInit, OnDestroy {
 
     });
 
-    this.count = this.todoItems.length;
+    // this.count = this.todoItems.length;
   }
 
   ngOnDestroy() {

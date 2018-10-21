@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import {reject} from 'q';
+import {Observable, Subscription} from 'rxjs';
 
 import { TodoItems } from '../../core/models/todo-items';
 import { TodoItemsService } from '../../core/services/todo-items.service';

@@ -24,4 +24,8 @@ export class HeaderComponent {
     }
   }
 
+  getAllItems() {
+    this.todoItemService.fetchTodoItems();
+  }
+
 }
