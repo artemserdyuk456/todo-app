@@ -32,7 +32,6 @@ export class TodoItemsComponent implements OnInit, OnDestroy {
 
   changeTodoItemComplete(itemId: number) {
     this.todoItemsService.toggleTodoItemComplete(itemId);
-
   }
 
   deleteTodoItemById(itemId: number) {
