@@ -55,7 +55,6 @@ export class TodoItemsService {
 
   toggleTodoItemComplete(id: number) {
     const strId = '' + id;
-    let con = false;
     const updateItem = {
       id: id,
       title: null,
