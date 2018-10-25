@@ -1,7 +1,6 @@
-import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import {SharedModule} from '../../shared/shared.module';
+import { SharedModule } from '../../shared/shared.module';
 import { TodosRoutingModule } from '../todos-routing.module';
 
 import { FooterComponent } from './footer.component';
@@ -14,4 +13,5 @@ import { FooterComponent } from './footer.component';
   declarations: [FooterComponent],
   exports: [FooterComponent]
 })
-export class FooterModule { }
+export class FooterModule {
+}

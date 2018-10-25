@@ -1,44 +1,19 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
-import {throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { TodoItems } from '../models/todo-items';
-import {RequestOptions} from '@angular/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TodoItemsService {
   todoItems: TodoItems[];
-  updateTodoItems = new Subject<TodoItems[]>();
 
-  constructor( private http: HttpClient) {
+  constructor(
+    private http: HttpClient) {
     this.fetchTodoItems();
-  }
-
-
-
-  fetchTodoItems() {
-    this.http.get('http://localhost:3000/todo-items')
-      .pipe(
-        catchError(this.handleError),
-        map(itemData => {
-        console.log(itemData);
-        const items = [];
-        for ( const key in itemData) {
-          if (itemData.hasOwnProperty(key)) {
-            items.push({...itemData[key]});
-          }
-        }
-        return items;
-      }))
-      .subscribe(transformData => {
-        console.log(transformData);
-        this.todoItems = transformData;
-        this.updateTodoItems.next([...this.todoItems]);
-      });
   }
 
   private handleError(error: HttpErrorResponse) {
@@ -46,98 +21,85 @@ export class TodoItemsService {
     if (error.message) {
       errorMessage = error.message;
     }
-    const initialState = { message: errorMessage};
-    console.log(initialState);
+    const initialState = {message: errorMessage};
+    console.error(initialState);
     return throwError(error);
   }
 
-
+  fetchTodoItems() {
+    this.http.get(`todo-items`)
+      .pipe(
+        catchError(this.handleError),
+        map(responseItemData => {
+          const items = [];
+          for (const key in responseItemData) {
+            if (responseItemData.hasOwnProperty(key)) {
+              items.push({...responseItemData[key]});
+            }
+          }
+          return items;
+        }))
+      .subscribe(transformData => {
+        this.todoItems = transformData;
+      });
+  }
 
   toggleTodoItemComplete(id: number) {
-    const strId = '' + id;
-    const updateItem = {
-      id: id,
-      title: null,
-      complete: false
-    };
-
-    this.http.put('http://localhost:3000/todo-items/' + strId, updateItem)
-      .pipe(catchError(this.handleError))
-      .subscribe( res => console.log(res));
-    const updateItems = this.todoItems.map(
-      item => {
-        if (item.id === id) {
-          item.complete = !item.complete;
-          return item;
-        }
+    let updateData;
+    this.todoItems.filter(item => {
+      if (item.id === id) {
+        item.complete = !item.complete;
+        updateData = {
+          id: item.id,
+          title: item.title,
+          complete: item.complete
+        };
+      }
+    });
+    this.http.put(`todo-items/${id}`, updateData)
+      .pipe(
+        catchError(this.handleError)
+      )
+      .subscribe(() => {
+        const updateItemsData = [...this.todoItems];
+        const oldItemIndex = updateItemsData.findIndex(item => item.id === id);
+        updateItemsData[oldItemIndex] = {
+          id: updateData.id,
+          title: updateData.title,
+          complete: updateData.complete
+        };
+        this.todoItems = updateItemsData;
       });
-
-    this.todoItems = updateItems;
-    this.updateTodoItems.next([...this.todoItems]);
   }
 
   addTodoItem(newItem) {
-    this.http.post('http://localhost:3000/todo-items', newItem)
-      .pipe(catchError(this.handleError))
+    this.http.post('todo-items', newItem)
+      .pipe(
+        catchError(this.handleError)
+      )
       .subscribe(response => {
-        console.log(response);
+        const updateItemsData = [...this.todoItems];
         if (response) {
-          this.todoItems.push(
+          updateItemsData.push(
             {
               id: newItem.id,
               title: newItem.title,
               complete: newItem.complete
             });
-          this.updateTodoItems.next([...this.todoItems]);
         }
+        this.todoItems = updateItemsData;
       });
   }
 
-
   deleteTodoItemById(id: number) {
-    const strId = '' + id;
-    this.http.delete('http://localhost:3000/todo-items/' + strId)
+    this.http.delete(`todo-items/${id}`)
       .pipe(
         catchError(this.handleError)
       )
       .subscribe(() => {
-        const updateItems = this.todoItems.filter(item => item.id !== id);
-        this.todoItems = updateItems;
-        this.updateTodoItems.next([...this.todoItems]);
+        this.todoItems = this.todoItems.filter(item => item.id !== id);
       });
   }
 
-  // addTodoItem(newItem) {
-  //   this.todoItems.push(
-  //     {
-  //       id: newItem.id,
-  //       title: newItem.title,
-  //       complete: newItem.complete
-  //     });
-  //   this.updateTodoItems.next([...this.todoItems]);
-  // }
 
-  // toggleTodoItemComplete(id: number) {
-  //   const updateItems = this.todoItems.map(
-  //     item => {
-  //       if (item.id === id) {
-  //         item.complete = !item.complete;
-  //       }
-  //       return item;
-  //     }
-  //   );
-  //
-  //   this.todoItems = updateItems;
-  //   this.updateTodoItems.next([...this.todoItems]);
-  // }
-
-  // deleteTodoItemById(id: number) {
-  //   const updateItems = this.todoItems.filter(item => item.id !== id);
-  //   this.todoItems = updateItems;
-  //   this.updateTodoItems.next([...this.todoItems]);
-  // }
-
-  getUpdateTodoItems() {
-    return this.updateTodoItems.asObservable();
-  }
 }

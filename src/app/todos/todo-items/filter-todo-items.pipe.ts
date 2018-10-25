@@ -1,27 +1,18 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
+
+import { TodoItems } from '../../core/models/todo-items';
 
 @Pipe({
-  name: 'filterTodoItemsPipe',
+  name: 'filterTodoItems',
 })
 export class FilterTodoItemsPipe implements PipeTransform {
 
-  transform(value: any, route: string, completed: string): any {
+  transform(value: TodoItems[], complete: boolean): any {
     if (!value) {
       return value;
     }
-    const resultArray = [];
-
-    for (const item of value) {
-      if (route === '') {
-        return value;
-      }
-      if (route === 'active' && item[completed] === false  ) {
-        resultArray.push(item);
-      }
-      if (route === 'completed' && item[completed] === true  ) {
-        resultArray.push(item);
-      }
-    }
-    return resultArray;
+    return value.filter(
+      item => complete === undefined || complete === item.complete
+    );
   }
 }
