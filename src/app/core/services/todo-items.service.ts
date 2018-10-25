@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {BehaviorSubject, Subject, throwError} from 'rxjs';
-import { catchError, map, mapTo, switchMap } from 'rxjs/operators';
+import {catchError, map, mapTo, switchMap, withLatestFrom} from 'rxjs/operators';
 
 import { TodoItems } from '../models/todo-items';
 
@@ -11,7 +11,7 @@ import { TodoItems } from '../models/todo-items';
 export class TodoItemsService {
   todoItems: TodoItems[];
 
-  // todoItems$ = new BehaviorSubject<TodoItems[]>();
+  todoItems$ = new BehaviorSubject<TodoItems[]>(this.todoItems);
 
   addTodoItem$ = new Subject<TodoItems[]>();
   fetchTodoItems$ = new Subject<TodoItems[]>();
@@ -40,22 +40,40 @@ export class TodoItemsService {
                 }
               ))
         ),
+
         catchError(this.handleError),
+        withLatestFrom(this.todoItems$),
+        map(([todoItem]) => {
+          return todoItem;
+        })
       )
-      .subscribe(transformData => {
-        this.todoItems = transformData;
-      });
+      .subscribe(
+        this.todoItems$
+      );
+
+    // this.addTodoItem$
+    //   .pipe(
+    //     switchMap((newTodoItem) => {
+    //       return this.http.post<TodoItems>(`todo-items`, newTodoItem);
+    //     }),
+    //     catchError(this.handleError)
+    //   )
+    //   .subscribe((todoItem) => {
+    //     this.todoItems = this.todoItems.concat(todoItem);
+    //   });
 
     this.addTodoItem$
       .pipe(
         switchMap((newTodoItem) => {
           return this.http.post<TodoItems>(`todo-items`, newTodoItem);
         }),
-        catchError(this.handleError)
+        catchError(this.handleError),
+        withLatestFrom(this.todoItems$),
+        map(([todoItem, todoItems]) => {
+          return todoItems.concat(todoItem);
+        })
       )
-      .subscribe((todoItem) => {
-        this.todoItems = this.todoItems.concat(todoItem);
-      });
+      .subscribe(this.todoItems$);
 
     this.deleteTodoItem$
       .pipe(
