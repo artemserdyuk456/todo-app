@@ -23,6 +23,7 @@ export class TodoItemsComponent implements OnInit {
 
   ngOnInit() {
     this.snapshotIsComplete = this.route.snapshot.data.complete;
+    this.todoItemsService.fetchTodoItems();
   }
 
   changeTodoItemComplete(itemId: number) {
