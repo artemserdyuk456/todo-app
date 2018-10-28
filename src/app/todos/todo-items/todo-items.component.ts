@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Data} from '@angular/router';
+import {concat, merge, Observable} from 'rxjs';
+import {map, switchAll, withLatestFrom} from 'rxjs/operators';
 
-import { TodoItems } from '../../core/models/todo-items';
-import { TodoItemsService } from '../../core/services/todo-items.service';
-import {Observable} from 'rxjs';
+import {TodoItems} from '../../core/models/todo-items';
+import {TodoItemsService} from '../../core/services/todo-items.service';
 
 @Component({
   selector: 'app-todo-items',
@@ -11,7 +12,7 @@ import {Observable} from 'rxjs';
   styleUrls: ['./todo-items.component.scss']
 })
 export class TodoItemsComponent implements OnInit {
-  snapshotIsComplete: boolean;
+
   todoItems$: Observable<TodoItems[]>;
 
   constructor(
@@ -19,14 +20,53 @@ export class TodoItemsComponent implements OnInit {
     private route: ActivatedRoute) {
   }
 
-  get todoItems(): TodoItems[] {
-    return this.todoItemsService.todoItems;
-  }
-
   ngOnInit() {
-    this.todoItems$ = this.todoItemsService.todoItems$;
-    this.snapshotIsComplete = this.route.snapshot.data.complete;
-    this.todoItemsService.fetchTodoItems();
+    // this.todoItemsService.fetchTodoItems();
+    // this.route.data
+    //   .subscribe(
+    //     (data: Data) => {
+    //       console.log(data.complete);
+    //     }
+    //   );
+
+
+    // switchAll().pipe(
+    //   map(
+    //     (data1) => {
+    //
+    //       console.log(data1);
+    //       // console.log(data2);
+    //     }
+    //   )
+    // ).subscribe();
+
+
+    this.todoItems$ = this.todoItemsService.todoItems$
+      .pipe(
+        withLatestFrom(this.route.data),
+        map(
+          (([items, complete]) => {
+              return items.filter(
+                item => complete['complete'] === undefined || complete['complete'] === item.complete
+              );
+            }
+          )
+        )
+      );
+
+    // this.todoItems$ = this.todoItemsService.todoItems$
+    //   .pipe(
+    //     withLatestFrom(this.route.data),
+    //     map(
+    //       (([items, complete]) => {
+    //             return items.filter(
+    //               item => complete['complete'] === undefined || complete['complete'] === item.complete
+    //             );
+    //         }
+    //       )
+    //     )
+    //   );
+
   }
 
   changeTodoItemComplete(itemId: number) {
@@ -36,5 +76,6 @@ export class TodoItemsComponent implements OnInit {
   deleteTodoItemById(itemId: number) {
     this.todoItemsService.deleteTodoItemById(itemId);
   }
+
 
 }

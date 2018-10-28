@@ -1,5 +1,5 @@
-<div class="items" *ngIf="countItems">
-  <p>Titles: <span>{{countItems}}</span></p>
+<div class="items" *ngIf="todoItems$ | async as todoItem">
+  <p>Titles: <span>{{todoItem.length}}</span></p>
 </div>
 <nav>
   <ul>
