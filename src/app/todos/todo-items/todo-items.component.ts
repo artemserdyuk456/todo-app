@@ -1,10 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Data} from '@angular/router';
-import {concat, merge, Observable} from 'rxjs';
-import {map, switchAll, withLatestFrom} from 'rxjs/operators';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import {Select, Store} from '@ngxs/store';
+import {combineLatest, Observable} from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import {TodoItems} from '../../core/models/todo-items';
-import {TodoItemsService} from '../../core/services/todo-items.service';
+import { TodoItems } from '../../core/models/todo-items';
+import { TodoItemsService } from '../../core/services/todo-items.service';
+import { DeleteTodoItem, ToggleTodoItemsComplete } from '../../ngxs/todos/todo-items.actions';
+import {TodoItemsState} from '../../ngxs/todos/todo-items.state';
 
 @Component({
   selector: 'app-todo-items',
@@ -12,70 +15,43 @@ import {TodoItemsService} from '../../core/services/todo-items.service';
   styleUrls: ['./todo-items.component.scss']
 })
 export class TodoItemsComponent implements OnInit {
-
-  todoItems$: Observable<TodoItems[]>;
+  @Select(TodoItemsState.getTodoItems) todoItems$: Observable<TodoItems[]>;
+  todoItem$: Observable<TodoItems[]>;
 
   constructor(
     private todoItemsService: TodoItemsService,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private store: Store) {
+
   }
 
   ngOnInit() {
-    // this.todoItemsService.fetchTodoItems();
-    // this.route.data
-    //   .subscribe(
-    //     (data: Data) => {
-    //       console.log(data.complete);
-    //     }
-    //   );
+    this.todoItem$ = combineLatest(
+        this.todoItems$,
+        this.route.data
+        .pipe(map(
+          data => data.complete
+        ))
+      ).pipe(
+      map(([items, complete]) => {
+        console.log(items);
+        return items.filter(
+          (item: TodoItems) => complete === undefined || complete === item.complete
+        );
+      })
+    );
 
 
-    // switchAll().pipe(
-    //   map(
-    //     (data1) => {
-    //
-    //       console.log(data1);
-    //       // console.log(data2);
-    //     }
-    //   )
-    // ).subscribe();
-
-
-    this.todoItems$ = this.todoItemsService.todoItems$
-      .pipe(
-        withLatestFrom(this.route.data),
-        map(
-          (([items, complete]) => {
-              return items.filter(
-                item => complete['complete'] === undefined || complete['complete'] === item.complete
-              );
-            }
-          )
-        )
-      );
-
-    // this.todoItems$ = this.todoItemsService.todoItems$
-    //   .pipe(
-    //     withLatestFrom(this.route.data),
-    //     map(
-    //       (([items, complete]) => {
-    //             return items.filter(
-    //               item => complete['complete'] === undefined || complete['complete'] === item.complete
-    //             );
-    //         }
-    //       )
-    //     )
-    //   );
 
   }
 
-  changeTodoItemComplete(itemId: number) {
-    this.todoItemsService.toggleTodoItemComplete(itemId);
+  changeTodoItemComplete(id: number) {
+    this.store.dispatch(new ToggleTodoItemsComplete(id));
   }
 
-  deleteTodoItemById(itemId: number) {
-    this.todoItemsService.deleteTodoItemById(itemId);
+  deleteTodoItemById(id: number) {
+    this.store.dispatch(new DeleteTodoItem(id));
   }
-
 
 }
+

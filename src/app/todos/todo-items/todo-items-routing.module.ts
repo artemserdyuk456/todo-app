@@ -1,14 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import {TodoItemsResolverService} from '../../core/resolvers/todo-items.resolver.service';
-
 import { TodoItemsComponent } from './todo-items.component';
 
 const todoItemsRoutes: Routes = [
-  {path: '', component: TodoItemsComponent, resolve: {server: TodoItemsResolverService}},
-  {path: 'active', component: TodoItemsComponent, data: {complete: false}, resolve: {server: TodoItemsResolverService}},
-  {path: 'completed', component: TodoItemsComponent, data: {complete: true}, resolve: {server: TodoItemsResolverService}}
+  {path: '', component: TodoItemsComponent},
+  {path: 'active', component: TodoItemsComponent, data: {complete: false}},
+  {path: 'completed', component: TodoItemsComponent, data: {complete: true}}
 ];
 
 @NgModule({
